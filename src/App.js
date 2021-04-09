@@ -18,7 +18,7 @@ class App extends React.Component {
     this.setState({ searchbox: event.target.value });
   };
   componentDidMount() {
-    fetch("http://jsonplaceholder.typicode.com/users")
+    fetch("https://jsonplaceholder.typicode.com/users")
       .then((response) => response.json())
       .then((people) => {
         this.setState({ robots: people });
