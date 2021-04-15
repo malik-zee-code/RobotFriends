@@ -5,37 +5,24 @@ import "tachyons";
 import CardList from "./component/Cardlist/cardlist.component";
 import { Searchbox } from "./component/searchbox/searchbox.component";
 import Scroll from "./component/Scroll/scroll.component";
-
+import { connect } from "react-redux";
+import { setSearchfield, requestRobots } from "./redux/actions";
 class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      robots: [],
-      searchbox: "",
-    };
-  }
-  Onsearchchange = (event) => {
-    this.setState({ searchbox: event.target.value });
-  };
   componentDidMount() {
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then((response) => response.json())
-      .then((people) => {
-        this.setState({ robots: people });
-      });
+    this.props.onRequestRobots();
   }
 
   render() {
-    const { robots, searchbox } = this.state;
+    const { searchField, onSearchChange, robots, isPending } = this.props;
     const filteredRobots = robots.filter((robot) => {
-      return robot.name.toLowerCase().includes(searchbox.toLowerCase());
+      return robot.name.toLowerCase().includes(searchField.toLowerCase());
     });
-    return !robots.length ? (
+    return isPending ? (
       <h1>Loading...</h1>
     ) : (
       <div className="App tc">
-        <h1 className="f1">Robot Friend</h1>
-        <Searchbox searchChange={this.Onsearchchange} />
+        <h1 className="f1">RobotFriend</h1>
+        <Searchbox searchChange={onSearchChange} />
         <Scroll>
           <CardList robots={filteredRobots} />
         </Scroll>
@@ -43,5 +30,24 @@ class App extends React.Component {
     );
   }
 }
-
-export default App;
+const mapStateToProps = (state) => {
+  //gets state from the redux store
+  //it can only read the state and then it passes down the value recieved from the
+  //redux to the component as a prop.
+  return {
+    searchField: state.searchRobots.searchField,
+    isPending: state.robotsFetch.isPending,
+    robots: state.robotsFetch.robots,
+    error: state.robotsFetch.error,
+  };
+};
+const mapDispatchToProps = (dispatch) => {
+  //gets state from the redux store
+  //it can modify the state and then it passes down the value recieved from the redux
+  //to the component as a prop.
+  return {
+    onSearchChange: (event) => dispatch(setSearchfield(event.target.value)),
+    onRequestRobots: () => dispatch(requestRobots()),
+  };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(App);
